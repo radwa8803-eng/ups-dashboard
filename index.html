@@ -4,67 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UPS Shipment Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --brown:#3d2410;
-  --brown2:#5c3720;
-  --brown3:#7a4e32;
-  --gold:#f5a623;
-  --gold2:#e8931a;
-  --gold3:#ffc94d;
-  --cream:#faf6ef;
-  --cream2:#f2ebe0;
-  --cream3:#e8dece;
-  --ink:#1a0f08;
-  --ink2:#4a3020;
-  --ink3:#7a6050;
-  --border:rgba(61,36,16,0.14);
-  --border2:rgba(61,36,16,0.28);
-  --green:#1a6640;
-  --green-bg:#e6f4ec;
-  --red:#b82020;
-  --red-bg:#fdeaea;
-  --shadow:0 2px 8px rgba(61,36,16,0.10);
-  --shadow2:0 8px 32px rgba(61,36,16,0.16);
-  --font:'Syne',sans-serif;
-  --mono:'DM Mono',monospace;
-  --r:10px;
-  --r2:16px;
+  --brown:#3d2410;--brown2:#5c3720;--brown3:#7a4e32;
+  --gold:#f5a623;--gold2:#e8931a;
+  --cream:#faf6ef;--cream2:#f2ebe0;--cream3:#e8dece;
+  --ink:#1a0f08;--ink2:#4a3020;--ink3:#7a6050;
+  --border:rgba(61,36,16,0.14);--border2:rgba(61,36,16,0.28);
+  --green:#1a6640;--green-bg:#e6f4ec;
+  --red:#b82020;--red-bg:#fdeaea;
+  --blue:#1a4fa0;--blue-bg:#e8eefb;
+  --shadow:0 2px 8px rgba(61,36,16,0.10);--shadow2:0 8px 32px rgba(61,36,16,0.16);
+  --font:'Syne',sans-serif;--mono:'DM Mono',monospace;
+  --r:10px;--r2:16px;
 }
-
 body{font-family:var(--font);background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px;line-height:1.5}
-
-/* ── HEADER ── */
-.hdr{
-  background:var(--brown);
-  padding:0 28px;
-  height:60px;
-  display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;z-index:100;
-  box-shadow:0 2px 16px rgba(0,0,0,0.25);
-}
+.login-screen{position:fixed;inset:0;background:var(--brown);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-screen.hidden{display:none}
+.login-card{background:var(--cream);border-radius:20px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,0.5);overflow:hidden}
+.login-hdr{background:var(--gold);padding:28px 28px 24px;text-align:center}
+.login-logo{background:var(--brown);color:var(--gold);font-family:var(--mono);font-weight:500;font-size:18px;padding:8px 18px;border-radius:8px;letter-spacing:.1em;display:inline-block;margin-bottom:12px}
+.login-hdr-title{font-size:20px;font-weight:800;color:var(--brown)}
+.login-hdr-sub{font-size:12px;color:var(--brown3);font-weight:500;margin-top:4px}
+.login-body{padding:28px}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.login-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3)}
+.login-field input{font-family:var(--font);font-size:14px;font-weight:500;background:var(--cream2);border:1.5px solid var(--border2);border-radius:var(--r);color:var(--ink);padding:10px 13px;outline:none;transition:border-color .15s;width:100%}
+.login-field input:focus{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(245,166,35,.15)}
+.login-err{font-size:12px;color:var(--red);font-weight:600;text-align:center;margin-bottom:12px;min-height:18px}
+.login-btn{width:100%;font-family:var(--font);font-size:14px;font-weight:700;background:var(--brown);color:#fff;border:none;border-radius:var(--r);padding:12px;cursor:pointer;transition:background .15s}
+.login-btn:hover{background:var(--brown2)}
+.login-btn:disabled{opacity:.6;cursor:not-allowed}
+.login-roles{display:flex;gap:8px;margin-top:20px}
+.role-pill{flex:1;border:1.5px solid var(--border2);border-radius:var(--r);padding:10px 8px;text-align:center;cursor:pointer;transition:all .15s;background:var(--cream2)}
+.role-pill:hover{border-color:var(--gold2);background:#fff8e8}
+.role-pill.active{border-color:var(--brown);background:var(--brown);color:#fff}
+.role-pill-icon{font-size:18px;margin-bottom:4px}
+.role-pill-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.role-hint{font-size:10px;opacity:.7;margin-top:2px}
+.hdr{background:var(--brown);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,0.25)}
 .hdr-left{display:flex;align-items:center;gap:14px}
-.logo{
-  background:var(--gold);color:var(--brown);
-  font-family:var(--mono);font-weight:500;font-size:14px;
-  padding:5px 12px;border-radius:6px;letter-spacing:0.08em;
-}
-.hdr-title{color:#fff;font-size:16px;font-weight:700;letter-spacing:0.01em}
-.hdr-right{display:flex;gap:8px}
-
-/* ── BUTTONS ── */
-.btn{
-  font-family:var(--font);font-size:13px;font-weight:600;
-  border-radius:var(--r);border:1.5px solid transparent;
-  cursor:pointer;padding:8px 16px;
-  display:inline-flex;align-items:center;gap:6px;
-  white-space:nowrap;transition:all 0.15s;letter-spacing:0.01em;
-}
-.btn:active{transform:scale(0.97)}
+.logo{background:var(--gold);color:var(--brown);font-family:var(--mono);font-weight:500;font-size:14px;padding:5px 12px;border-radius:6px;letter-spacing:.08em}
+.hdr-title{color:#fff;font-size:16px;font-weight:700}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.user-chip{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:5px 12px 5px 8px}
+.user-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.avatar-admin{background:var(--gold);color:var(--brown)}
+.avatar-user{background:rgba(255,255,255,0.25);color:#fff}
+.user-name{font-size:12px;font-weight:600;color:#fff}
+.user-role-lbl{font-size:10px;color:rgba(255,255,255,0.6)}
+.sync-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.sync-badge.ok{background:rgba(26,102,64,0.3);color:#6ee89a}
+.sync-badge.err{background:rgba(184,32,32,0.3);color:#f08080}
+.sync-badge.loading{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sync-dot.spin{animation:pulse .8s ease-in-out infinite}
+.role-banner{padding:9px 28px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px}
+.role-banner.admin{background:#fffaec;color:var(--gold2);border-bottom:1px solid rgba(245,166,35,.2)}
+.role-banner.user{background:var(--blue-bg);color:var(--blue);border-bottom:1px solid rgba(26,79,160,.15)}
+.role-banner.hidden{display:none}
+.btn{font-family:var(--font);font-size:13px;font-weight:600;border-radius:var(--r);border:1.5px solid transparent;cursor:pointer;padding:8px 16px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s}
+.btn:active{transform:scale(.97)}
 .btn-gold{background:var(--gold);color:var(--brown);border-color:var(--gold2)}
 .btn-gold:hover{background:var(--gold2);color:#fff}
 .btn-outline{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);border-color:rgba(255,255,255,0.2)}
@@ -76,206 +80,137 @@ body{font-family:var(--font);background:var(--cream);color:var(--ink);min-height
 .btn-danger{background:var(--red-bg);color:var(--red);border-color:rgba(184,32,32,0.3)}
 .btn-danger:hover{background:var(--red);color:#fff}
 .btn-sm{padding:5px 10px;font-size:12px;border-radius:7px}
-.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none!important}
-
-/* ── MAIN ── */
-.main{padding:24px 28px 56px;max-width:1460px;margin:0 auto}
-
-/* ── STATS ── */
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.main{padding:20px 28px 56px;max-width:1460px;margin:0 auto}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
-.stat{
-  background:var(--cream);border:1px solid var(--border);
-  border-radius:var(--r2);padding:16px 18px;
-  box-shadow:var(--shadow);position:relative;overflow:hidden;
-}
-.stat::before{
-  content:'';position:absolute;top:0;right:0;
-  width:60px;height:60px;
-  background:var(--gold);opacity:0.06;
-  border-radius:0 0 0 60px;
-}
-.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:6px}
+.stat{background:var(--cream);border:1px solid var(--border);border-radius:var(--r2);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;background:var(--gold);opacity:.06;border-radius:0 0 0 60px}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:6px}
 .stat-val{font-size:26px;font-weight:800;color:var(--ink)}
 .stat-val.g{color:var(--gold2)}
 .stat-val.sm{font-size:18px}
-
-/* ── TOOLBAR ── */
-.toolbar{
-  background:var(--cream);border:1px solid var(--border);
-  border-radius:var(--r2);padding:14px 16px;
-  margin-bottom:12px;box-shadow:var(--shadow);
-  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
-}
+.stat.skeleton{background:linear-gradient(90deg,var(--cream2) 25%,#e8e2d8 50%,var(--cream2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;min-height:72px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.toolbar{background:var(--cream);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .srch{position:relative;flex:1;min-width:220px}
 .srch-ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--ink3);pointer-events:none}
-input[type=text],input[type=date],select{
-  font-family:var(--font);font-size:13px;font-weight:500;
-  background:var(--cream2);border:1.5px solid var(--border2);
-  border-radius:var(--r);color:var(--ink);padding:8px 11px;
-  outline:none;transition:border-color 0.15s,box-shadow 0.15s;width:100%;
-}
-input[type=text]:focus,input[type=date]:focus,select:focus{
-  border-color:var(--gold2);box-shadow:0 0 0 3px rgba(245,166,35,0.15);
-}
+input[type=text],input[type=date],input[type=password],select{font-family:var(--font);font-size:13px;font-weight:500;background:var(--cream2);border:1.5px solid var(--border2);border-radius:var(--r);color:var(--ink);padding:8px 11px;outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+input[type=text]:focus,input[type=date]:focus,input[type=password]:focus,select:focus{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(245,166,35,.15)}
 .srch input{padding-left:32px}
 select{min-width:160px;cursor:pointer}
-
-/* ── BULK BAR ── */
-.bulk{
-  background:var(--brown);border-radius:var(--r);
-  padding:9px 16px;margin-bottom:10px;
-  display:flex;align-items:center;gap:12px;
-  color:#fff;font-size:13px;font-weight:600;
-  animation:slideDown 0.15s ease;
-}
+.bulk{background:var(--brown);border-radius:var(--r);padding:9px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;color:#fff;font-size:13px;font-weight:600}
 .bulk.hidden{display:none}
-@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── TABLE ── */
 .tbl-wrap{background:var(--cream);border:1px solid var(--border);border-radius:var(--r2);box-shadow:var(--shadow);overflow:hidden}
 .tbl-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
 thead tr{background:var(--cream2);border-bottom:1.5px solid var(--border2)}
-th{
-  padding:11px 13px;text-align:left;font-weight:700;font-size:10px;
-  text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3);
-  white-space:nowrap;
-}
+th{padding:11px 13px;text-align:left;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);white-space:nowrap}
 th.sort{cursor:pointer;user-select:none}
 th.sort:hover{color:var(--ink)}
 th.asc,th.desc{color:var(--brown2)}
 .si{font-size:10px;margin-left:3px}
-tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:#fdf7ee}
 tbody tr.sel{background:#fffaec}
+tbody tr.own-row{border-left:3px solid var(--gold2)}
 td{padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 td.awb{font-family:var(--mono);font-size:12px;color:var(--brown2);font-weight:500}
 td.val{font-family:var(--mono);font-size:12px;font-weight:500}
-
-.c-chk{width:38px}.c-awb{width:150px}.c-acc{width:170px}
-.c-val{width:115px}.c-inv{width:158px}.c-per{width:140px}
-.c-dt{width:118px}.c-fil{width:140px}.c-act{width:115px}
-
+.c-chk{width:38px}.c-awb{width:148px}.c-acc{width:165px}.c-val{width:108px}.c-inv{width:150px}.c-per{width:138px}.c-dt{width:112px}.c-act{width:115px}
 input[type=checkbox]{width:15px;height:15px;accent-color:var(--brown);cursor:pointer}
-
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;
-  max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.b-file{background:var(--green-bg);color:var(--green)}
-.b-none{background:var(--cream2);color:var(--ink3)}
-
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.b-ok{background:var(--green-bg);color:var(--green)}
+.b-no{background:var(--cream2);color:var(--ink3)}
 .act-btns{display:flex;gap:4px}
-
-/* ── FOOTER ── */
-.tbl-foot{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:11px 16px;border-top:1px solid var(--border);
-  background:var(--cream2);flex-wrap:wrap;gap:8px;
-}
+.tbl-foot{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid var(--border);background:var(--cream2);flex-wrap:wrap;gap:8px}
 .pg-info{font-size:12px;color:var(--ink3);font-weight:500}
 .pager{display:flex;gap:4px;align-items:center}
-.pg-btn{
-  font-family:var(--mono);font-size:12px;
-  width:32px;height:32px;border:1.5px solid var(--border2);
-  border-radius:7px;background:var(--cream);color:var(--ink3);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.1s;
-}
+.pg-btn{font-family:var(--mono);font-size:12px;width:32px;height:32px;border:1.5px solid var(--border2);border-radius:7px;background:var(--cream);color:var(--ink3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}
 .pg-btn:hover:not(:disabled){background:var(--cream2);color:var(--ink)}
 .pg-btn.active{background:var(--brown);color:#fff;border-color:var(--brown)}
-.pg-btn:disabled{opacity:0.3;cursor:default}
+.pg-btn:disabled{opacity:.3;cursor:default}
 .pg-dots{color:var(--ink3);font-size:12px;padding:0 4px}
-
-/* ── EMPTY / LOADING ── */
 .empty{text-align:center;padding:64px 20px;color:var(--ink3)}
 .empty-ic{font-size:40px;margin-bottom:12px}
 .empty-tx{font-size:13px;line-height:1.7;font-weight:500}
-
-/* ── MODAL ── */
-.overlay{
-  position:fixed;inset:0;background:rgba(26,15,8,0.6);
-  z-index:200;display:flex;align-items:center;justify-content:center;
-  padding:20px;animation:fadeIn 0.15s ease;
-}
+.overlay{position:fixed;inset:0;background:rgba(26,15,8,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s ease}
 .overlay.hidden{display:none}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal{
-  background:var(--cream);border-radius:var(--r2);
-  width:100%;max-width:560px;box-shadow:var(--shadow2);
-  animation:up 0.18s ease;max-height:92vh;overflow-y:auto;
-}
+.modal{background:var(--cream);border-radius:var(--r2);width:100%;max-width:560px;box-shadow:var(--shadow2);animation:up .18s ease;max-height:92vh;overflow-y:auto}
 @keyframes up{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
-.mhdr{
-  background:var(--brown);padding:16px 20px;
-  display:flex;align-items:center;justify-content:space-between;
-  border-radius:var(--r2) var(--r2) 0 0;position:sticky;top:0;z-index:1;
-}
+.mhdr{background:var(--brown);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-radius:var(--r2) var(--r2) 0 0;position:sticky;top:0;z-index:1}
 .mhdr-title{color:#fff;font-size:16px;font-weight:700}
-.mclose{background:none;border:none;color:rgba(255,255,255,0.6);cursor:pointer;font-size:18px;padding:4px 7px;border-radius:5px;line-height:1;transition:color 0.1s}
+.mclose{background:none;border:none;color:rgba(255,255,255,.6);cursor:pointer;font-size:18px;padding:4px 7px;border-radius:5px;line-height:1}
 .mclose:hover{color:#fff}
 .mbody{padding:22px 20px}
 .mfoot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--cream);border-radius:0 0 var(--r2) var(--r2)}
-
 .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
 .ff{display:flex;flex-direction:column;gap:6px}
 .ff.full{grid-column:1/-1}
-.flbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--ink3)}
+.flbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3)}
 .req{color:var(--red)}
 .ferr{font-size:11px;color:var(--red);font-weight:500}
 .ferr.hidden{display:none}
-input.err,select.err{border-color:var(--red)}
-
-.drop{
-  border:2px dashed var(--border2);border-radius:var(--r);
-  padding:24px 20px;text-align:center;cursor:pointer;
-  transition:all 0.15s;background:var(--cream2);
-}
+input.err{border-color:var(--red)!important}
+.drop{border:2px dashed var(--border2);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:var(--cream2)}
 .drop:hover,.drop.over{border-color:var(--gold2);background:#fff8e8}
-.drop-ic{font-size:28px;margin-bottom:8px}
+.drop-ic{font-size:26px;margin-bottom:6px}
 .drop-tx{font-size:12px;color:var(--ink3);line-height:1.6;font-weight:500}
 .drop-tx strong{color:var(--brown2)}
 #fileInput{display:none}
 .fattach{font-size:12px;color:var(--green);margin-top:6px;font-family:var(--mono);font-weight:500}
 .fattach.hidden{display:none}
-
-/* ── CONFIRM DIALOG ── */
 .cdialog{max-width:400px}
 .cdialog .mhdr{background:#7a1a1a}
 .cmsg{font-size:14px;line-height:1.7;color:var(--ink);font-weight:500}
-
-/* ── TOAST ── */
-.toast{
-  position:fixed;bottom:24px;right:24px;
-  background:var(--brown);color:#fff;
-  padding:12px 20px;border-radius:var(--r);
-  font-size:13px;font-weight:600;z-index:400;
-  box-shadow:var(--shadow2);transition:opacity 0.3s,transform 0.3s;
-  max-width:340px;display:flex;align-items:center;gap:8px;
-}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--brown);color:#fff;padding:12px 20px;border-radius:var(--r);font-size:13px;font-weight:600;z-index:400;box-shadow:var(--shadow2);transition:opacity .3s,transform .3s;max-width:340px}
 .toast.hidden{opacity:0;transform:translateY(8px);pointer-events:none}
 .toast.ok{border-left:4px solid var(--gold)}
 .toast.err{border-left:4px solid var(--red)}
-
-/* ── NOTICE ── */
-.notice{
-  background:#fffaec;border:1px solid rgba(245,166,35,0.4);
-  border-radius:var(--r);padding:10px 14px;margin-bottom:14px;
-  font-size:12px;color:var(--brown2);font-weight:500;
-  display:flex;align-items:center;gap:8px;
-}
-
-@media(max-width:900px){
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .c-inv,.c-val{display:none}
-  .fgrid{grid-template-columns:1fr}
-  .main{padding:14px 14px 40px}
-  .hdr{padding:0 14px}
-}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.c-inv,.c-val{display:none}.fgrid{grid-template-columns:1fr}.main{padding:14px 14px 40px}.hdr{padding:0 14px}.role-banner{padding:8px 14px}}
 </style>
 </head>
 <body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-hdr">
+      <div class="login-logo">UPS</div>
+      <div class="login-hdr-title">Shipment Tracker</div>
+      <div class="login-hdr-sub">Sign in to access your dashboard</div>
+    </div>
+    <div class="login-body">
+      <div style="margin-bottom:18px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);margin-bottom:8px">Sign in as</div>
+        <div class="login-roles">
+          <div class="role-pill active" id="pill-admin" onclick="selectRole('admin')">
+            <div class="role-pill-icon"></div>
+            <div class="role-pill-name">Admin</div>
+            <div class="role-hint">Full access</div>
+          </div>
+          <div class="role-pill" id="pill-user" onclick="selectRole('user')">
+            <div class="role-pill-icon">&#x1F464;</div>
+            <div class="role-pill-name">User</div>
+            <div class="role-hint">View &amp; add</div>
+          </div>
+        </div>
+      </div>
+      <div class="login-field">
+        <label class="login-label">Username</label>
+        <input type="text" id="l_user" placeholder="Enter username" autocomplete="username">
+      </div>
+      <div class="login-field">
+        <label class="login-label">Password</label>
+        <input type="password" id="l_pass" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <div class="login-err" id="loginErr"></div>
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign In &#x2192;</button>
+    </div>
+  </div>
+</div>
 
 <div class="hdr">
   <div class="hdr-left">
@@ -283,36 +218,44 @@ input.err,select.err{border-color:var(--red)}
     <span class="hdr-title">Shipment Tracker</span>
   </div>
   <div class="hdr-right">
-    <button class="btn btn-outline" id="exportBtn">↓ Export CSV</button>
-    <button class="btn btn-gold" id="addBtn">+ Add Shipment</button>
+    <span class="sync-badge loading" id="syncBadge"><span class="sync-dot spin"></span> Connecting&hellip;</span>
+    <button class="btn btn-outline" onclick="loadData()">&#x21BB; Refresh</button>
+    <button class="btn btn-outline" onclick="exportCSV()">&#x2193; Export</button>
+    <button class="btn btn-gold" onclick="openAdd()">+ Add Shipment</button>
+    <div class="user-chip">
+      <div class="user-avatar" id="userAvatar"></div>
+      <div>
+        <div class="user-name" id="userName"></div>
+        <div class="user-role-lbl" id="userRoleLbl"></div>
+      </div>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="logout()">&#x238B; Logout</button>
   </div>
 </div>
 
+<div class="role-banner hidden" id="roleBanner"></div>
+
 <div class="main">
-
-  <div class="notice" id="storageNotice">
-    💾 Your data is saved automatically in this browser. To use on another device, export CSV and re-import.
+  <div class="stats" id="statsRow">
+    <div class="stat skeleton"></div><div class="stat skeleton"></div>
+    <div class="stat skeleton"></div><div class="stat skeleton"></div>
+    <div class="stat skeleton"></div>
   </div>
-
-  <div class="stats" id="statsRow"></div>
-
   <div class="toolbar">
     <div class="srch">
-      <span class="srch-ic">🔍</span>
-      <input type="text" id="searchInput" placeholder="Search AWB, account, person, invoice…">
+      <span class="srch-ic">&#x1F50D;</span>
+      <input type="text" id="searchInput" placeholder="Search AWB, account, person, invoice&hellip;">
     </div>
     <select id="personFilter"><option value="">All responsible</option></select>
     <input type="date" id="dateFrom" title="Date from">
     <input type="date" id="dateTo" title="Date to">
-    <button class="btn btn-ghost" id="clearBtn">Clear</button>
+    <button class="btn btn-ghost" onclick="clearFilters()">Clear</button>
   </div>
-
   <div class="bulk hidden" id="bulkBar">
     <span id="bulkCount">0 selected</span>
-    <button class="btn btn-sm btn-outline" id="exportSelBtn">↓ Export selected</button>
-    <button class="btn btn-sm" id="deleteSelBtn" style="background:rgba(255,255,255,0.1);color:#ffcc66;border-color:rgba(255,255,255,0.2)">🗑 Delete</button>
+    <button class="btn btn-sm btn-outline" onclick="exportSel()" style="color:#fff;border-color:rgba(255,255,255,.3)">&#x2193; Export</button>
+    <button class="btn btn-sm" id="bulkDelBtn" onclick="deleteSelected()" style="background:rgba(255,255,255,.1);color:#ffcc66;border-color:rgba(255,255,255,.2)">&#x1F5D1; Delete</button>
   </div>
-
   <div class="tbl-wrap">
     <div class="tbl-scroll">
       <table>
@@ -321,11 +264,10 @@ input.err,select.err{border-color:var(--red)}
             <th class="c-chk"><input type="checkbox" id="selectAll"></th>
             <th class="c-awb sort" data-col="awb">AWB Number <span class="si"></span></th>
             <th class="c-acc sort" data-col="account">Account Name <span class="si"></span></th>
-            <th class="c-val sort" data-col="value_cents">Value <span class="si"></span></th>
+            <th class="c-val sort" data-col="value">Value <span class="si"></span></th>
             <th class="c-inv sort" data-col="invoice">Invoice No. <span class="si"></span></th>
             <th class="c-per sort" data-col="person">Responsible <span class="si"></span></th>
             <th class="c-dt sort" data-col="date">Date Sent <span class="si"></span></th>
-            <th class="c-fil">Document</th>
             <th class="c-act">Actions</th>
           </tr>
         </thead>
@@ -333,627 +275,409 @@ input.err,select.err{border-color:var(--red)}
       </table>
     </div>
     <div class="tbl-foot">
-      <span class="pg-info" id="pgInfo"></span>
+      <span class="pg-info" id="pgInfo">Loading&hellip;</span>
       <div class="pager" id="pager"></div>
     </div>
   </div>
 </div>
 
-<!-- ADD/EDIT MODAL -->
 <div class="overlay hidden" id="modalOv">
   <div class="modal">
     <div class="mhdr">
       <span class="mhdr-title" id="mTitle">Add New Shipment</span>
-      <button class="mclose" id="mClose">✕</button>
+      <button class="mclose" onclick="closeModal()">&#x2715;</button>
     </div>
     <div class="mbody">
       <div class="fgrid">
-        <div class="ff">
-          <label class="flbl">AWB Number <span class="req">*</span></label>
-          <input type="text" id="f_awb" placeholder="e.g. 1Z999AA10123456784">
-          <span class="ferr hidden" id="e_awb">Required</span>
-        </div>
-        <div class="ff">
-          <label class="flbl">Account Name <span class="req">*</span></label>
-          <input type="text" id="f_acc" placeholder="Client or company name">
-          <span class="ferr hidden" id="e_acc">Required</span>
-        </div>
-        <div class="ff">
-          <label class="flbl">Value (USD)</label>
-          <input type="text" id="f_val" placeholder="e.g. 12,500">
-        </div>
-        <div class="ff">
-          <label class="flbl">Invoice Number</label>
-          <input type="text" id="f_inv" placeholder="e.g. INV-2024-0451">
-        </div>
-        <div class="ff">
-          <label class="flbl">Responsible Person <span class="req">*</span></label>
-          <input type="text" id="f_per" placeholder="Full name">
-          <span class="ferr hidden" id="e_per">Required</span>
-        </div>
-        <div class="ff">
-          <label class="flbl">Date Sent to Finance</label>
-          <input type="date" id="f_date">
-        </div>
+        <div class="ff"><label class="flbl">AWB Number <span class="req">*</span></label><input type="text" id="f_awb" placeholder="e.g. 1Z999AA10123456784"><span class="ferr hidden" id="e_awb">Required</span></div>
+        <div class="ff"><label class="flbl">Account Name <span class="req">*</span></label><input type="text" id="f_acc" placeholder="Client or company name"><span class="ferr hidden" id="e_acc">Required</span></div>
+        <div class="ff"><label class="flbl">Value (USD)</label><input type="text" id="f_val" placeholder="e.g. $12,500"></div>
+        <div class="ff"><label class="flbl">Invoice Number</label><input type="text" id="f_inv" placeholder="e.g. INV-2024-0451"></div>
+        <div class="ff"><label class="flbl">Responsible Person <span class="req">*</span></label><input type="text" id="f_per" placeholder="Full name"><span class="ferr hidden" id="e_per">Required</span></div>
+        <div class="ff"><label class="flbl">Date Sent to Finance</label><input type="date" id="f_date"></div>
         <div class="ff full">
           <label class="flbl">Attach Document</label>
-          <div class="drop" id="dropZone">
-            <div class="drop-ic">📄</div>
-            <div class="drop-tx" id="dropTx"><strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX, XLSX — max 20 MB</div>
-          </div>
+          <div class="drop" id="dropZone"><div class="drop-ic">&#x1F4C4;</div><div class="drop-tx" id="dropTx"><strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX &mdash; max 20 MB</div></div>
           <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx">
           <div class="fattach hidden" id="fattach"></div>
         </div>
       </div>
     </div>
     <div class="mfoot">
-      <button class="btn btn-ghost" id="mCancel">Cancel</button>
-      <button class="btn btn-brown" id="mSave">Add Shipment</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-brown" id="mSave" onclick="saveShipment()">Add Shipment</button>
     </div>
   </div>
 </div>
 
-<!-- CONFIRM DIALOG -->
 <div class="overlay hidden" id="confirmOv">
   <div class="modal cdialog">
-    <div class="mhdr">
-      <span class="mhdr-title">Confirm Delete</span>
-      <button class="mclose" id="cClose">✕</button>
-    </div>
-    <div class="mbody">
-      <p class="cmsg" id="cMsg"></p>
-    </div>
-    <div class="mfoot">
-      <button class="btn btn-ghost" id="cCancel">Cancel</button>
-      <button class="btn btn-danger" id="cOk">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- IMPORT CSV DIALOG -->
-<div class="overlay hidden" id="importOv">
-  <div class="modal" style="max-width:480px">
-    <div class="mhdr">
-      <span class="mhdr-title">Import from CSV</span>
-      <button class="mclose" id="iClose">✕</button>
-    </div>
-    <div class="mbody">
-      <p style="font-size:13px;line-height:1.7;color:var(--ink2);margin-bottom:14px;font-weight:500">
-        Import shipments from a CSV file. The file must have these columns:<br>
-        <code style="font-family:var(--mono);font-size:11px;background:var(--cream2);padding:6px 10px;border-radius:6px;display:block;margin-top:8px">AWB Number, Account Name, Value, Invoice Number, Responsible Person, Date Sent</code>
-      </p>
-      <div class="drop" id="csvDrop" style="margin-bottom:0">
-        <div class="drop-ic">📊</div>
-        <div class="drop-tx"><strong>Click to choose CSV</strong> or drag &amp; drop</div>
-      </div>
-      <input type="file" id="csvInput" accept=".csv" style="display:none">
-      <div class="fattach hidden" id="csvAttach"></div>
-    </div>
-    <div class="mfoot">
-      <button class="btn btn-ghost" id="iCancel">Cancel</button>
-      <button class="btn btn-brown" id="iImport" disabled>Import</button>
-    </div>
+    <div class="mhdr"><span class="mhdr-title">Confirm Delete</span><button class="mclose" onclick="closeConfirm()">&#x2715;</button></div>
+    <div class="mbody"><p class="cmsg" id="cMsg"></p><p style="margin-top:10px;font-size:12px;color:var(--ink3)">This permanently deletes the record(s) from the database.</p></div>
+    <div class="mfoot"><button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button><button class="btn btn-danger" id="cOk">Delete</button></div>
   </div>
 </div>
 
 <div class="toast hidden" id="toast"></div>
 
 <script>
-// ── Storage ──────────────────────────────────────────────────────────────────
-const STORE_KEY = 'ups_shipments_v2';
-
-function load() {
-  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }
-  catch { return []; }
-}
-function save(data) {
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
-  catch(e) { toast('Storage full — export your data to free space.','err'); }
-}
-
-// ── State ────────────────────────────────────────────────────────────────────
-let S = {
-  data: [],
-  filtered: [],
-  sortCol: 'id',
-  sortDir: 'asc',
-  page: 1,
-  ps: 10,
-  sel: new Set(),
-  editId: null,
-  file: null,
-  csvRows: null,
+// ══════════════════════════════════════════════════════════
+// CREDENTIALS  ← Change these to your own passwords!
+// ══════════════════════════════════════════════════════════
+const CREDENTIALS = {
+  admin: { username: 'admin',    password: 'Admin@2024' },
+  user:  { username: 'teamuser', password: 'User@2024'  }
 };
 
-// ── Seed demo data ───────────────────────────────────────────────────────────
-const DEMO = [
-  {id:1,awb:'1Z999AA10123456784',account:'Pharma Solutions Ltd',value:'$24,800',value_cents:2480000,invoice:'INV-2024-0118',person:'Ahmed Khalil',date:'2024-11-12',file_name:'shipping_docs_pharma.pdf'},
-  {id:2,awb:'1Z999BB20987654321',account:'Global Tech Corp',value:'$8,350',value_cents:835000,invoice:'INV-2024-0234',person:'Sara Mansour',date:'2024-11-18',file_name:null},
-  {id:3,awb:'1Z888CC30112233445',account:'Cairo Imports Co.',value:'$62,100',value_cents:6210000,invoice:'INV-2024-0301',person:'Omar Fathy',date:'2024-11-20',file_name:'customs_clearance.pdf'},
-  {id:4,awb:'1Z777DD40556677889',account:'NileChem Industries',value:'$15,900',value_cents:1590000,invoice:'INV-2024-0415',person:'Layla Hassan',date:'2024-11-22',file_name:'invoice_pack.docx'},
-  {id:5,awb:'1Z666EE50223344556',account:'Delta Logistics',value:'$4,200',value_cents:420000,invoice:'INV-2024-0502',person:'Ahmed Khalil',date:'2024-11-25',file_name:null},
-  {id:6,awb:'1Z555FF60334455667',account:'MedEquip Egypt',value:'$88,400',value_cents:8840000,invoice:'INV-2024-0611',person:'Sara Mansour',date:'2024-11-28',file_name:'med_equipment_docs.pdf'},
-  {id:7,awb:'1Z444GG70445566778',account:'Alexandria Exports',value:'$31,750',value_cents:3175000,invoice:'INV-2024-0722',person:'Khaled Amin',date:'2024-12-01',file_name:null},
-  {id:8,awb:'1Z333HH80556677889',account:'Textiles United',value:'$9,600',value_cents:960000,invoice:'INV-2024-0833',person:'Omar Fathy',date:'2024-12-03',file_name:'textile_cert.jpg'},
-  {id:9,awb:'1Z222II90667788990',account:'Suez Canal Freight',value:'$47,200',value_cents:4720000,invoice:'INV-2024-0944',person:'Layla Hassan',date:'2024-12-05',file_name:'freight_manifest.pdf'},
-  {id:10,awb:'1Z111JJ00778899001',account:'Pharma Solutions Ltd',value:'$18,500',value_cents:1850000,invoice:'INV-2024-1055',person:'Khaled Amin',date:'2024-12-08',file_name:null},
-  {id:11,awb:'1Z000KK10889900112',account:'Global Tech Corp',value:'$3,250',value_cents:325000,invoice:'INV-2024-1166',person:'Ahmed Khalil',date:'2024-12-10',file_name:'declaration.pdf'},
-  {id:12,awb:'1Z999LL20990011223',account:'Cairo Imports Co.',value:'$55,000',value_cents:5500000,invoice:'INV-2024-1277',person:'Sara Mansour',date:'2024-12-12',file_name:null},
-];
+// ══════════════════════════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════════════════════════
+const SUPA_URL = 'https://pykctposjplajlwjjrox.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5a2N0cG9zanBsYWpsd2pqcm94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1MzE5NjAsImV4cCI6MjA5MzEwNzk2MH0.58nON_yFXAj-RmzDzxyXQDkBErI5aWRutoQ1n1tXj9E';
+const BUCKET   = 'shipment-docs';
+const { createClient } = supabase;
+const db = createClient(SUPA_URL, SUPA_KEY);
 
-let nextId;
+// ══════════════════════════════════════════════════════════
+// SESSION
+// ══════════════════════════════════════════════════════════
+let SESSION = null;
+function getSession(){ try{ return JSON.parse(sessionStorage.getItem('ups_sess')); }catch{ return null; } }
+function setSession(s){ sessionStorage.setItem('ups_sess', JSON.stringify(s)); }
+function clearSession(){ sessionStorage.removeItem('ups_sess'); }
 
-function initData() {
-  S.data = load();
-  if (S.data.length === 0) { S.data = DEMO; save(S.data); }
-  nextId = Math.max(0, ...S.data.map(r => r.id)) + 1;
+// ══════════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════════
+let selectedRole = 'admin';
+function selectRole(role){
+  selectedRole = role;
+  g('pill-admin').classList.toggle('active', role==='admin');
+  g('pill-user').classList.toggle('active', role==='user');
+}
+function doLogin(){
+  const username = g('l_user').value.trim();
+  const password = g('l_pass').value;
+  const cred = CREDENTIALS[selectedRole];
+  if(!username||!password){ g('loginErr').textContent='Please enter username and password.'; return; }
+  if(username===cred.username && password===cred.password){
+    SESSION = { role: selectedRole, username };
+    setSession(SESSION);
+    g('loginErr').textContent='';
+    g('loginScreen').classList.add('hidden');
+    applyRoleUI();
+    startApp();
+  } else {
+    g('loginErr').textContent='Incorrect username or password.';
+    g('l_pass').value='';
+    g('l_pass').focus();
+  }
+}
+function logout(){ clearSession(); SESSION=null; location.reload(); }
+function applyRoleUI(){
+  const isAdmin = SESSION.role==='admin';
+  g('userAvatar').className = 'user-avatar ' + (isAdmin?'avatar-admin':'avatar-user');
+  g('userAvatar').textContent = SESSION.username[0].toUpperCase();
+  g('userName').textContent = SESSION.username;
+  g('userRoleLbl').textContent = isAdmin ? 'Admin' : 'User';
+  const banner = g('roleBanner');
+  banner.classList.remove('hidden');
+  if(isAdmin){
+    banner.className='role-banner admin';
+    banner.innerHTML=' <strong>Admin Mode</strong> &mdash; Full access: add, edit, delete and export all shipments.';
+  } else {
+    banner.className='role-banner user';
+    banner.innerHTML='&#x1F464; <strong>User Mode</strong> &mdash; You can view, add, edit and delete shipments, and export CSV. Your rows are highlighted in gold &#x2605;';
+    // users have full access
+  }
 }
 
-// ── Boot ─────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  initData();
-  bindEvents();
-  applyFilters();
-  renderStats();
+// ══════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════
+let S = { data:[], filtered:[], sortCol:'created_at', sortDir:'desc', page:1, ps:10, sel:new Set(), editId:null, attachedFile:null };
+
+// ══════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  g('l_pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  g('l_user').addEventListener('keydown', e=>{ if(e.key==='Enter') g('l_pass').focus(); });
+  SESSION = getSession();
+  if(SESSION){ g('loginScreen').classList.add('hidden'); applyRoleUI(); startApp(); }
 });
 
-// ── Events ───────────────────────────────────────────────────────────────────
-function bindEvents() {
-  // search/filter
-  let deb;
-  g('searchInput').addEventListener('input', () => { clearTimeout(deb); deb = setTimeout(applyFilters, 220); });
-  g('personFilter').addEventListener('change', applyFilters);
-  g('dateFrom').addEventListener('change', applyFilters);
-  g('dateTo').addEventListener('change', applyFilters);
-  g('clearBtn').addEventListener('click', clearFilters);
-
-  // sort headers
-  document.querySelectorAll('th.sort').forEach(th => {
-    th.addEventListener('click', () => {
-      const col = th.dataset.col;
-      S.sortDir = S.sortCol === col ? (S.sortDir === 'asc' ? 'desc' : 'asc') : 'asc';
-      S.sortCol = col;
-      applyFilters();
-    });
-  });
-
-  // pagination
-  g('pager').addEventListener('click', e => {
-    const btn = e.target.closest('.pg-btn');
-    if (btn && !btn.disabled) { S.page = +btn.dataset.page; renderTable(); }
-  });
-
-  // select all
-  g('selectAll').addEventListener('change', e => {
-    const rows = pageRows();
-    rows.forEach(r => e.target.checked ? S.sel.add(r.id) : S.sel.delete(r.id));
-    updateBulk(); renderTable();
-  });
-
-  // row checkboxes & action buttons (delegated)
-  g('tbody').addEventListener('change', e => {
-    if (e.target.type === 'checkbox') {
-      const id = +e.target.dataset.id;
-      e.target.checked ? S.sel.add(id) : S.sel.delete(id);
-      updateBulk(); renderTable();
-    }
-  });
-  g('tbody').addEventListener('click', e => {
-    const btn = e.target.closest('[data-action]');
-    if (!btn) return;
-    const id = +btn.dataset.id;
-    if (btn.dataset.action === 'edit') openEdit(id);
-    if (btn.dataset.action === 'del') confirmDel([id], '1 shipment');
-  });
-
-  // header actions
-  g('addBtn').addEventListener('click', openAdd);
-  g('exportBtn').addEventListener('click', exportAll);
-  g('exportSelBtn').addEventListener('click', exportSel);
-  g('deleteSelBtn').addEventListener('click', () => {
-    const ids = [...S.sel];
-    confirmDel(ids, `${ids.length} shipment(s)`);
-  });
-
-  // modal
-  g('mClose').addEventListener('click', closeModal);
-  g('mCancel').addEventListener('click', closeModal);
-  g('mSave').addEventListener('click', saveShipment);
-  g('modalOv').addEventListener('click', e => { if (e.target === g('modalOv')) closeModal(); });
-
-  // confirm
-  g('cClose').addEventListener('click', closeConfirm);
-  g('cCancel').addEventListener('click', closeConfirm);
-
-  // file drop zone
-  g('dropZone').addEventListener('click', () => g('fileInput').click());
-  g('fileInput').addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
-  g('dropZone').addEventListener('dragover', e => { e.preventDefault(); g('dropZone').classList.add('over'); });
-  g('dropZone').addEventListener('dragleave', () => g('dropZone').classList.remove('over'));
-  g('dropZone').addEventListener('drop', e => {
-    e.preventDefault(); g('dropZone').classList.remove('over');
-    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
-  });
-
-  // CSV import
-  g('csvDrop').addEventListener('click', () => g('csvInput').click());
-  g('csvInput').addEventListener('change', e => { if (e.target.files[0]) previewCSV(e.target.files[0]); });
-  g('csvDrop').addEventListener('dragover', e => { e.preventDefault(); g('csvDrop').classList.add('over'); });
-  g('csvDrop').addEventListener('dragleave', () => g('csvDrop').classList.remove('over'));
-  g('csvDrop').addEventListener('drop', e => {
-    e.preventDefault(); g('csvDrop').classList.remove('over');
-    if (e.dataTransfer.files[0]) previewCSV(e.dataTransfer.files[0]);
-  });
-  g('iClose').addEventListener('click', closeImport);
-  g('iCancel').addEventListener('click', closeImport);
-  g('iImport').addEventListener('click', doImport);
+function startApp(){
+  bindEvents();
+  loadData();
+  db.channel('shipments-rt')
+    .on('postgres_changes',{event:'*',schema:'public',table:'shipments'},()=>loadData())
+    .subscribe(status=>{ if(status==='SUBSCRIBED') setSyncBadge('ok','Live &bull; connected'); });
+  setInterval(loadData, 10000);
 }
 
-// ── Filter & Sort ─────────────────────────────────────────────────────────────
-function applyFilters() {
-  const q = g('searchInput').value.toLowerCase().trim();
-  const person = g('personFilter').value;
-  const df = g('dateFrom').value;
-  const dt = g('dateTo').value;
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
+let firstLoad=true;
+async function loadData(){
+  if(firstLoad) setSyncBadge('loading','Connecting&hellip;');
+  try{
+    const {data,error} = await db.from('shipments').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    S.data=data||[];
+    firstLoad=false;
+    const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    setSyncBadge('ok',`Live &bull; ${S.data.length} rows &bull; ${t}`);
+    applyFilters(); renderStats(); populatePeople();
+  }catch(e){
+    setSyncBadge('err','Connection error');
+    if(firstLoad) toast('Failed to connect: '+e.message,'err');
+  }
+}
+function setSyncBadge(type,html){
+  const b=g('syncBadge');
+  b.className='sync-badge '+type;
+  b.innerHTML=`<span class="sync-dot ${type==='loading'?'spin':''}"></span> `+html;
+}
 
-  S.filtered = S.data.filter(r => {
-    if (q && ![r.awb,r.account,r.person,r.invoice].some(v => (v||'').toLowerCase().includes(q))) return false;
-    if (person && r.person !== person) return false;
-    if (df && r.date < df) return false;
-    if (dt && r.date > dt) return false;
+// ══════════════════════════════════════════════════════════
+// FILTER & SORT
+// ══════════════════════════════════════════════════════════
+function applyFilters(){
+  const q=g('searchInput').value.toLowerCase().trim();
+  const person=g('personFilter').value;
+  const df=g('dateFrom').value, dt=g('dateTo').value;
+  S.filtered=S.data.filter(r=>{
+    if(q&&![r.awb,r.account,r.person,r.invoice].some(v=>(v||'').toLowerCase().includes(q))) return false;
+    if(person&&r.person!==person) return false;
+    if(df&&r.date<df) return false;
+    if(dt&&r.date>dt) return false;
     return true;
   });
-
-  // sort
-  const dir = S.sortDir === 'asc' ? 1 : -1;
-  S.filtered.sort((a,b) => {
-    let va = a[S.sortCol] || '', vb = b[S.sortCol] || '';
-    if (S.sortCol === 'value_cents') { va = +va; vb = +vb; }
-    return va < vb ? -dir : va > vb ? dir : 0;
-  });
-
-  S.page = 1;
-  S.sel.clear();
-  updateBulk();
-  renderTable();
-  populatePeople();
-  renderSortIcons();
+  const dir=S.sortDir==='asc'?1:-1;
+  S.filtered.sort((a,b)=>{ let va=a[S.sortCol]||'',vb=b[S.sortCol]||''; return va<vb?-dir:va>vb?dir:0; });
+  S.page=1; S.sel.clear(); updateBulkBar(); renderTable(); renderSortIcons();
+}
+function clearFilters(){ g('searchInput').value='';g('personFilter').value='';g('dateFrom').value='';g('dateTo').value=''; applyFilters(); }
+function populatePeople(){
+  const sel=g('personFilter'),cur=sel.value;
+  const people=[...new Set(S.data.map(r=>r.person))].filter(Boolean).sort();
+  sel.innerHTML='<option value="">All responsible</option>'+people.map(p=>`<option value="${esc(p)}"${p===cur?' selected':''}>${esc(p)}</option>`).join('');
 }
 
-function clearFilters() {
-  g('searchInput').value = '';
-  g('personFilter').value = '';
-  g('dateFrom').value = '';
-  g('dateTo').value = '';
-  applyFilters();
-}
-
-function populatePeople() {
-  const sel = g('personFilter');
-  const cur = sel.value;
-  const people = [...new Set(S.data.map(r => r.person))].filter(Boolean).sort();
-  sel.innerHTML = '<option value="">All responsible</option>' +
-    people.map(p => `<option value="${esc(p)}" ${p===cur?'selected':''}>${esc(p)}</option>`).join('');
-}
-
-// ── Table ─────────────────────────────────────────────────────────────────────
-function pageRows() {
-  const start = (S.page - 1) * S.ps;
-  return S.filtered.slice(start, start + S.ps);
-}
-
-function renderTable() {
-  const total = S.filtered.length;
-  const pages = Math.ceil(total / S.ps) || 1;
-  S.page = Math.min(S.page, pages);
-  const start = (S.page - 1) * S.ps;
-  const rows = pageRows();
-  const tb = g('tbody');
-
-  if (!rows.length) {
-    tb.innerHTML = `<tr><td colspan="9"><div class="empty"><div class="empty-ic">📦</div><div class="empty-tx">No shipments found.<br>Try adjusting your search or filters.</div></div></td></tr>`;
+// ══════════════════════════════════════════════════════════
+// TABLE
+// ══════════════════════════════════════════════════════════
+function renderTable(){
+  const isAdmin=SESSION&&SESSION.role==='admin';
+  const total=S.filtered.length,pages=Math.ceil(total/S.ps)||1;
+  S.page=Math.min(S.page,pages);
+  const start=(S.page-1)*S.ps,rows=S.filtered.slice(start,start+S.ps);
+  const tb=g('tbody');
+  if(!rows.length){
+    tb.innerHTML='<tr><td colspan="8"><div class="empty"><div class="empty-ic">&#x1F4E6;</div><div class="empty-tx">No shipments found.</div></div></td></tr>';
   } else {
-    tb.innerHTML = rows.map(r => {
-      const isSel = S.sel.has(r.id);
-      const fileBadge = r.file_name
-        ? `<span class="badge b-file" title="${esc(r.file_name)}">📎 ${esc(trunc(r.file_name,15))}</span>`
-        : `<span class="badge b-none">No file</span>`;
-      return `<tr class="${isSel?'sel':''}" data-id="${r.id}">
+    tb.innerHTML=rows.map(r=>{
+      const isSel=S.sel.has(r.id);
+      const isOwn=r.added_by===SESSION?.username;
+      const fileBadge=r.file_name?`<span class="badge b-ok" title="${esc(r.file_name)}">&#x1F4CE; ${esc(trunc(r.file_name,14))}</span>`:'<span class="badge b-no">No file</span>';
+      // Both admin and user can edit and delete all shipments
+      // Own rows get a gold star for the user
+      let actions=`<button class="btn btn-sm btn-ghost" data-action="edit" data-id="${r.id}">Edit</button><button class="btn btn-sm btn-danger" data-action="del" data-id="${r.id}">Del</button>${isOwn&&!isAdmin?'<span style="font-size:10px;color:var(--gold2);font-weight:700;padding:0 2px">&#x2605;</span>':''}`; 
+      return `<tr class="${isSel?'sel':''} ${isOwn&&!isAdmin?'own-row':''}" data-id="${r.id}">
         <td><input type="checkbox" data-id="${r.id}" ${isSel?'checked':''}></td>
         <td class="awb" title="${esc(r.awb)}">${esc(r.awb)}</td>
         <td title="${esc(r.account)}">${esc(trunc(r.account,23))}</td>
-        <td class="val">${esc(r.value)||'—'}</td>
+        <td class="val">${esc(r.value)||'&mdash;'}</td>
         <td title="${esc(r.invoice)}">${esc(trunc(r.invoice,19))}</td>
         <td title="${esc(r.person)}">${esc(trunc(r.person,19))}</td>
         <td>${fmtDate(r.date)}</td>
-        <td>${fileBadge}</td>
-        <td><div class="act-btns">
-          <button class="btn btn-sm btn-ghost" data-action="edit" data-id="${r.id}">Edit</button>
-          <button class="btn btn-sm btn-danger" data-action="del" data-id="${r.id}">Del</button>
-        </div></td>
+        <td><div class="act-btns">${actions}</div></td>
       </tr>`;
     }).join('');
   }
-
-  // select-all state
-  const ids = rows.map(r => r.id);
-  g('selectAll').checked = ids.length > 0 && ids.every(id => S.sel.has(id));
-  g('selectAll').indeterminate = ids.some(id => S.sel.has(id)) && !ids.every(id => S.sel.has(id));
-
-  g('pgInfo').textContent = total === 0 ? 'No results' : `${start+1}–${Math.min(start+S.ps, total)} of ${total}`;
+  const ids=rows.map(r=>r.id);
+  g('selectAll').checked=ids.length>0&&ids.every(id=>S.sel.has(id));
+  g('selectAll').indeterminate=ids.some(id=>S.sel.has(id))&&!ids.every(id=>S.sel.has(id));
+  g('pgInfo').textContent=total===0?'No results':`${start+1}\u2013${Math.min(start+S.ps,total)} of ${total}`;
   renderPager(pages);
 }
-
-function renderPager(pages) {
-  const p = S.page;
-  let h = `<button class="pg-btn" data-page="${p-1}" ${p===1?'disabled':''}>‹</button>`;
-  for (let i=1;i<=pages;i++) {
-    if (pages>7 && i>2 && i<pages-1 && Math.abs(i-p)>1) {
-      if (i===3||i===pages-2) h+=`<span class="pg-dots">…</span>`;
-      continue;
-    }
+function renderPager(pages){
+  const p=S.page;
+  let h=`<button class="pg-btn" data-page="${p-1}" ${p===1?'disabled':''}>&#x2039;</button>`;
+  for(let i=1;i<=pages;i++){
+    if(pages>7&&i>2&&i<pages-1&&Math.abs(i-p)>1){if(i===3||i===pages-2)h+='<span class="pg-dots">&hellip;</span>';continue;}
     h+=`<button class="pg-btn ${i===p?'active':''}" data-page="${i}">${i}</button>`;
   }
-  h+=`<button class="pg-btn" data-page="${p+1}" ${p===pages?'disabled':''}>›</button>`;
-  g('pager').innerHTML = h;
+  h+=`<button class="pg-btn" data-page="${p+1}" ${p===pages?'disabled':''}>&#x203A;</button>`;
+  g('pager').innerHTML=h;
 }
-
-function renderSortIcons() {
-  document.querySelectorAll('th.sort').forEach(th => {
-    const col = th.dataset.col;
-    const si = th.querySelector('.si');
-    th.classList.remove('asc','desc');
-    si.textContent = '';
-    if (col === S.sortCol) {
-      th.classList.add(S.sortDir);
-      si.textContent = S.sortDir === 'asc' ? '▲' : '▼';
-    }
+function renderSortIcons(){
+  document.querySelectorAll('th.sort').forEach(th=>{
+    const col=th.dataset.col,si=th.querySelector('.si');
+    th.classList.remove('asc','desc');si.textContent='';
+    if(col===S.sortCol){th.classList.add(S.sortDir);si.textContent=S.sortDir==='asc'?'\u25b2':'\u25bc';}
   });
 }
-
-// ── Stats ─────────────────────────────────────────────────────────────────────
-function renderStats() {
-  const data = S.data;
-  const total = data.length;
-  const withDocs = data.filter(r => r.file_name).length;
-  const people = new Set(data.map(r => r.person)).size;
-  const totalVal = data.reduce((s,r) => s + (r.value_cents||0), 0);
-  g('statsRow').innerHTML = `
+function renderStats(){
+  const d=S.data,total=d.length;
+  const withDocs=d.filter(r=>r.file_name).length;
+  const people=new Set(d.map(r=>r.person)).size;
+  const mine=d.filter(r=>r.added_by===SESSION?.username).length;
+  g('statsRow').innerHTML=`
     <div class="stat"><div class="stat-lbl">Total Shipments</div><div class="stat-val">${total}</div></div>
     <div class="stat"><div class="stat-lbl">With Documents</div><div class="stat-val g">${withDocs}</div></div>
     <div class="stat"><div class="stat-lbl">Pending Docs</div><div class="stat-val">${total-withDocs}</div></div>
     <div class="stat"><div class="stat-lbl">Responsible Persons</div><div class="stat-val">${people}</div></div>
-    <div class="stat"><div class="stat-lbl">Total Value</div><div class="stat-val sm">$${Math.round(totalVal/100).toLocaleString()}</div></div>
-  `;
+    <div class="stat"><div class="stat-lbl">My Shipments</div><div class="stat-val sm">${mine}</div></div>`;
 }
 
-// ── Bulk bar ──────────────────────────────────────────────────────────────────
-function updateBulk() {
-  const n = S.sel.size;
-  g('bulkBar').classList.toggle('hidden', n===0);
-  g('bulkCount').textContent = `${n} selected`;
+// ══════════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════════
+function openAdd(){
+  S.editId=null;S.attachedFile=null;clearForm();resetDrop();
+  g('mTitle').textContent='Add New Shipment';g('mSave').textContent='Add Shipment';
+  g('modalOv').classList.remove('hidden');setTimeout(()=>g('f_awb').focus(),80);
 }
-
-// ── Modal ─────────────────────────────────────────────────────────────────────
-function openAdd() {
-  S.editId = null; S.file = null;
-  clearForm();
-  g('mTitle').textContent = 'Add New Shipment';
-  g('mSave').textContent = 'Add Shipment';
-  resetDrop();
-  g('modalOv').classList.remove('hidden');
-  setTimeout(()=>g('f_awb').focus(),80);
-}
-
-function openEdit(id) {
-  const r = S.data.find(x => x.id === id);
-  if (!r) return;
-  S.editId = id; S.file = null;
-  clearForm();
-  g('f_awb').value = r.awb||'';
-  g('f_acc').value = r.account||'';
-  g('f_val').value = r.value||'';
-  g('f_inv').value = r.invoice||'';
-  g('f_per').value = r.person||'';
-  g('f_date').value = r.date||'';
-  g('mTitle').textContent = 'Edit Shipment';
-  g('mSave').textContent = 'Save Changes';
-  if (r.file_name) {
-    g('dropTx').innerHTML = `<strong>Current:</strong> ${esc(r.file_name)}<br><small style="color:var(--ink3)">Drop a new file to replace</small>`;
-  } else { resetDrop(); }
+function openEdit(id){
+  const r=S.data.find(x=>x.id===id);if(!r)return;
+  // All users can edit any shipment
+  S.editId=id;S.attachedFile=null;clearForm();
+  g('f_awb').value=r.awb||'';g('f_acc').value=r.account||'';g('f_val').value=r.value||'';
+  g('f_inv').value=r.invoice||'';g('f_per').value=r.person||'';g('f_date').value=r.date||'';
+  g('mTitle').textContent='Edit Shipment';g('mSave').textContent='Save Changes';
+  if(r.file_name){g('dropTx').innerHTML=`<strong>Current:</strong> ${esc(r.file_name)}<br><small style="color:var(--ink3)">Drop a new file to replace</small>`;}else{resetDrop();}
   g('modalOv').classList.remove('hidden');
 }
-
-function closeModal() {
-  g('modalOv').classList.add('hidden');
-  S.editId = null; S.file = null;
+function closeModal(){g('modalOv').classList.add('hidden');S.editId=null;S.attachedFile=null;}
+function clearForm(){
+  ['f_awb','f_acc','f_val','f_inv','f_per'].forEach(id=>g(id).value='');
+  g('f_date').value='';g('fileInput').value='';g('fattach').classList.add('hidden');
+  ['e_awb','e_acc','e_per'].forEach(id=>g(id).classList.add('hidden'));
+  ['f_awb','f_acc','f_per'].forEach(id=>g(id).classList.remove('err'));
 }
-
-function clearForm() {
-  ['f_awb','f_acc','f_val','f_inv','f_per'].forEach(id => g(id).value='');
-  g('f_date').value='';
-  g('fileInput').value='';
-  g('fattach').classList.add('hidden');
-  ['e_awb','e_acc','e_per'].forEach(id => g(id).classList.add('hidden'));
-  ['f_awb','f_acc','f_per'].forEach(id => g(id).classList.remove('err'));
+function resetDrop(){g('dropTx').innerHTML='<strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX &mdash; max 20 MB';}
+function setFile(f){
+  if(f.size>20*1024*1024){toast('File too large. Max 20MB.','err');return;}
+  S.attachedFile=f;g('fattach').textContent='\u2713 '+f.name+'  ('+(f.size/1024).toFixed(0)+' KB)';g('fattach').classList.remove('hidden');
 }
-
-function resetDrop() {
-  g('dropTx').innerHTML='<strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX, XLSX — max 20 MB';
-}
-
-function setFile(f) {
-  if (f.size > 20*1024*1024) { toast('File too large. Max 20MB.','err'); return; }
-  S.file = f;
-  g('fattach').textContent = `✓ ${f.name}  (${(f.size/1024).toFixed(0)} KB)`;
-  g('fattach').classList.remove('hidden');
-}
-
-function saveShipment() {
-  const awb = g('f_awb').value.trim();
-  const acc = g('f_acc').value.trim();
-  const per = g('f_per').value.trim();
-  let ok = true;
+async function saveShipment(){
+  const awb=g('f_awb').value.trim(),acc=g('f_acc').value.trim(),per=g('f_per').value.trim();
+  let ok=true;
   [['e_awb','f_awb',awb],['e_acc','f_acc',acc],['e_per','f_per',per]].forEach(([ei,fi,v])=>{
-    if (!v){ g(ei).classList.remove('hidden'); g(fi).classList.add('err'); ok=false; }
-    else { g(ei).classList.add('hidden'); g(fi).classList.remove('err'); }
+    if(!v){g(ei).classList.remove('hidden');g(fi).classList.add('err');ok=false;}
+    else{g(ei).classList.add('hidden');g(fi).classList.remove('err');}
   });
-  if (!ok) return;
-
-  const rec = {
-    awb, account:acc,
-    value: g('f_val').value.trim()||'',
-    value_cents: parseCents(g('f_val').value),
-    invoice: g('f_inv').value.trim()||'',
-    person: per,
-    date: g('f_date').value||'',
-    file_name: S.file ? S.file.name : null,
-  };
-
-  if (S.editId) {
-    const idx = S.data.findIndex(r => r.id===S.editId);
-    if (!S.file) rec.file_name = S.data[idx].file_name;
-    S.data[idx] = { ...S.data[idx], ...rec };
-    toast('Shipment updated','ok');
-  } else {
-    rec.id = nextId++;
-    S.data.push(rec);
-    toast('Shipment added','ok');
-  }
-
-  save(S.data);
-  closeModal();
-  applyFilters();
-  renderStats();
+  if(!ok)return;
+  const btn=g('mSave');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Saving\u2026';
+  try{
+    let file_name=null;
+    if(S.attachedFile){
+      const ext=S.attachedFile.name.split('.').pop();
+      const path=Date.now()+'_'+Math.random().toString(36).substr(2,6)+'.'+ext;
+      const {error:upErr}=await db.storage.from(BUCKET).upload(path,S.attachedFile);
+      if(upErr) throw new Error('File upload failed: '+upErr.message);
+      file_name=path;
+    }
+    const rec={awb,account:acc,value:g('f_val').value.trim(),invoice:g('f_inv').value.trim(),person:per,date:g('f_date').value||''};
+    if(S.editId){
+      if(file_name) rec.file_name=file_name;
+      const {error}=await db.from('shipments').update(rec).eq('id',S.editId);
+      if(error) throw error;
+      toast('Shipment updated \u2713','ok');
+    } else {
+      rec.file_name=file_name;
+      rec.added_by=SESSION.username;
+      const {error}=await db.from('shipments').insert(rec);
+      if(error) throw error;
+      toast('Shipment added \u2713','ok');
+    }
+    closeModal();await loadData();
+  }catch(e){toast('Error: '+e.message,'err');}
+  finally{btn.disabled=false;btn.textContent=S.editId?'Save Changes':'Add Shipment';}
 }
 
-// ── Delete ────────────────────────────────────────────────────────────────────
-function confirmDel(ids, label) {
-  g('cMsg').textContent = `Are you sure you want to delete ${label}? This cannot be undone.`;
+// ══════════════════════════════════════════════════════════
+// DELETE
+// ══════════════════════════════════════════════════════════
+function confirmDel(ids,label){
+  // All users can delete shipments
+  g('cMsg').textContent='Delete '+label+'?';
   g('confirmOv').classList.remove('hidden');
-  g('cOk').onclick = () => {
-    S.data = S.data.filter(r => !ids.includes(r.id));
-    ids.forEach(id => S.sel.delete(id));
-    save(S.data);
+  g('cOk').onclick=async()=>{
     closeConfirm();
-    updateBulk();
-    applyFilters();
-    renderStats();
-    toast(`Deleted ${ids.length} shipment(s)`,'ok');
+    try{
+      const {error}=await db.from('shipments').delete().in('id',ids);
+      if(error) throw error;
+      S.sel.clear();updateBulkBar();toast('Deleted '+ids.length+' record(s) \u2713','ok');await loadData();
+    }catch(e){toast('Delete failed: '+e.message,'err');}
   };
 }
+function closeConfirm(){g('confirmOv').classList.add('hidden');}
+function deleteSelected(){const ids=[...S.sel];if(!ids.length)return;confirmDel(ids,ids.length+' shipment(s)');}
 
-function closeConfirm() { g('confirmOv').classList.add('hidden'); }
-
-// ── Export CSV ────────────────────────────────────────────────────────────────
-function exportAll() {
-  csvDown(S.filtered, 'ups_shipments.csv');
+// ══════════════════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════════════════
+function exportCSV(){csvDown(S.filtered,'ups_shipments.csv');}
+function exportSel(){const rows=S.data.filter(r=>S.sel.has(r.id));if(!rows.length){toast('Nothing selected','err');return;}csvDown(rows,'ups_selected.csv');}
+function csvDown(rows,fname){
+  const hdr=['AWB Number','Account Name','Value','Invoice Number','Responsible Person','Date Sent','Document','Added By'];
+  const lines=[hdr.join(','),...rows.map(r=>[q(r.awb),q(r.account),q(r.value),q(r.invoice),q(r.person),q(r.date),q(r.file_name||''),q(r.added_by||'')].join(','))];
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();
+  toast('Exported '+rows.length+' records','ok');
 }
 
-function exportSel() {
-  const rows = S.data.filter(r => S.sel.has(r.id));
-  if (!rows.length) { toast('Nothing selected','err'); return; }
-  csvDown(rows, 'ups_selected.csv');
+// ══════════════════════════════════════════════════════════
+// BULK & EVENTS
+// ══════════════════════════════════════════════════════════
+function updateBulkBar(){const n=S.sel.size;g('bulkBar').classList.toggle('hidden',n===0);g('bulkCount').textContent=n+' selected';}
+function bindEvents(){
+  let deb;
+  g('searchInput').addEventListener('input',()=>{clearTimeout(deb);deb=setTimeout(applyFilters,220);});
+  g('personFilter').addEventListener('change',applyFilters);
+  g('dateFrom').addEventListener('change',applyFilters);
+  g('dateTo').addEventListener('change',applyFilters);
+  document.querySelectorAll('th.sort').forEach(th=>{
+    th.addEventListener('click',()=>{const col=th.dataset.col;S.sortDir=S.sortCol===col?(S.sortDir==='asc'?'desc':'asc'):'asc';S.sortCol=col;applyFilters();});
+  });
+  g('pager').addEventListener('click',e=>{const btn=e.target.closest('.pg-btn');if(btn&&!btn.disabled){S.page=+btn.dataset.page;renderTable();}});
+  g('selectAll').addEventListener('change',e=>{
+    const rows=S.filtered.slice((S.page-1)*S.ps,S.page*S.ps);
+    rows.forEach(r=>e.target.checked?S.sel.add(r.id):S.sel.delete(r.id));
+    updateBulkBar();renderTable();
+  });
+  g('tbody').addEventListener('change',e=>{
+    if(e.target.type==='checkbox'){const id=e.target.dataset.id;e.target.checked?S.sel.add(id):S.sel.delete(id);updateBulkBar();renderTable();}
+  });
+  g('tbody').addEventListener('click',e=>{
+    const btn=e.target.closest('[data-action]');if(!btn)return;
+    const id=btn.dataset.id;
+    if(btn.dataset.action==='edit') openEdit(id);
+    if(btn.dataset.action==='del')  confirmDel([id],'1 shipment');
+  });
+  g('modalOv').addEventListener('click',e=>{if(e.target===g('modalOv'))closeModal();});
+  g('confirmOv').addEventListener('click',e=>{if(e.target===g('confirmOv'))closeConfirm();});
+  g('dropZone').addEventListener('click',()=>g('fileInput').click());
+  g('fileInput').addEventListener('change',e=>{if(e.target.files[0])setFile(e.target.files[0]);});
+  g('dropZone').addEventListener('dragover',e=>{e.preventDefault();g('dropZone').classList.add('over');});
+  g('dropZone').addEventListener('dragleave',()=>g('dropZone').classList.remove('over'));
+  g('dropZone').addEventListener('drop',e=>{e.preventDefault();g('dropZone').classList.remove('over');if(e.dataTransfer.files[0])setFile(e.dataTransfer.files[0]);});
 }
 
-function csvDown(rows, fname) {
-  const hdr = ['ID','AWB Number','Account Name','Value','Invoice Number','Responsible Person','Date Sent','Document'];
-  const lines = [hdr.join(','), ...rows.map(r =>
-    [r.id, q(r.awb), q(r.account), q(r.value), q(r.invoice), q(r.person), q(r.date), q(r.file_name||'')].join(',')
-  )];
-  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = fname;
-  a.click();
-  toast(`Exported ${rows.length} records`,'ok');
-}
-
-// ── Import CSV ────────────────────────────────────────────────────────────────
-function openImport() {
-  S.csvRows = null;
-  g('csvInput').value='';
-  g('csvAttach').classList.add('hidden');
-  g('iImport').disabled = true;
-  g('importOv').classList.remove('hidden');
-}
-
-function closeImport() { g('importOv').classList.add('hidden'); }
-
-function previewCSV(f) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const lines = e.target.result.split('\n').filter(l=>l.trim());
-    if (lines.length < 2) { toast('CSV has no data rows','err'); return; }
-    const rows = lines.slice(1).map(line => {
-      const cols = parseCSVLine(line);
-      return {
-        id: nextId++,
-        awb: cols[0]||'',
-        account: cols[1]||'',
-        value: cols[2]||'',
-        value_cents: parseCents(cols[2]||''),
-        invoice: cols[3]||'',
-        person: cols[4]||'',
-        date: cols[5]||'',
-        file_name: null,
-      };
-    }).filter(r => r.awb && r.account && r.person);
-    S.csvRows = rows;
-    g('csvAttach').textContent = `✓ ${rows.length} valid rows found in ${f.name}`;
-    g('csvAttach').classList.remove('hidden');
-    g('iImport').disabled = rows.length === 0;
-  };
-  reader.readAsText(f);
-}
-
-function doImport() {
-  if (!S.csvRows) return;
-  S.data.push(...S.csvRows);
-  save(S.data);
-  closeImport();
-  applyFilters();
-  renderStats();
-  toast(`Imported ${S.csvRows.length} shipments`,'ok');
-  S.csvRows = null;
-}
-
-function parseCSVLine(line) {
-  const result = []; let cur=''; let inQ=false;
-  for (let i=0;i<line.length;i++) {
-    const c=line[i];
-    if (c==='"') { if (inQ && line[i+1]==='"') { cur+='"'; i++; } else inQ=!inQ; }
-    else if (c===',' && !inQ) { result.push(cur.trim()); cur=''; }
-    else cur+=c;
-  }
-  result.push(cur.trim());
-  return result;
-}
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════
+function g(id){return document.getElementById(id);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function trunc(s,n){return s&&s.length>n?s.substring(0,n)+'\u2026':(s||'');}
+function q(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}
+function fmtDate(d){if(!d)return'\u2014';const[y,m,day]=d.split('-');return (day||'?')+'/'+(m||'?')+'/'+(y||'?');}
 let _tt;
-function toast(msg, type='') {
-  const t = g('toast');
-  t.textContent = msg;
-  t.className = `toast ${type}`;
-  clearTimeout(_tt);
-  _tt = setTimeout(()=>t.classList.add('hidden'), 3200);
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function g(id) { return document.getElementById(id); }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function trunc(s,n) { return s&&s.length>n ? s.substring(0,n)+'…' : (s||''); }
-function q(v) { return `"${String(v||'').replace(/"/g,'""')}"` ; }
-function fmtDate(d) {
-  if (!d) return '—';
-  const [y,m,day] = d.split('-');
-  return `${day||'?'}/${m||'?'}/${y||'?'}`;
-}
-function parseCents(v) {
-  const n = parseFloat(String(v).replace(/[^0-9.]/g,''));
-  return isNaN(n) ? 0 : Math.round(n*100);
-}
+function toast(msg,type=''){const t=g('toast');t.textContent=msg;t.className='toast '+type;clearTimeout(_tt);_tt=setTimeout(()=>t.classList.add('hidden'),3500);}
 </script>
 </body>
 </html>
