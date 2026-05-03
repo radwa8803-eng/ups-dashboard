@@ -171,6 +171,42 @@ input.err{border-color:var(--red)!important}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.c-inv,.c-val{display:none}.fgrid{grid-template-columns:1fr}.main{padding:14px 14px 40px}.hdr{padding:0 14px}.role-banner{padding:8px 14px}}
+
+.stab-wrap{border-bottom:1px solid var(--border);background:var(--cream2);display:flex;gap:0;padding:0 28px}
+.stab{font-family:var(--font);font-size:13px;font-weight:600;padding:12px 20px;border:none;background:none;color:var(--ink3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.stab:hover{color:var(--ink)}
+.stab.active{color:var(--brown);border-bottom-color:var(--gold2)}
+.spage{display:none}.spage.active{display:block}
+.settings-card{background:var(--cream);border:1px solid var(--border);border-radius:var(--r2);padding:24px;box-shadow:var(--shadow);max-width:560px}
+.settings-card+.settings-card{margin-top:16px}
+.settings-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.settings-sub{font-size:12px;color:var(--ink3);margin-bottom:20px}
+.settings-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.settings-field{display:flex;flex-direction:column;gap:5px}
+.settings-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3)}
+.settings-divider{height:1px;background:var(--border);margin:20px 0}
+.badge-admin{background:#fffaec;color:var(--gold2);border:1px solid rgba(245,166,35,.3);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.badge-user{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(26,79,160,.2);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+
+body.dark{
+  --cream:#1a1410;--cream2:#231c16;--cream3:#2d241c;
+  --ink:#f5f0e8;--ink2:#d4c8b8;--ink3:#a89880;
+  --border:rgba(245,240,232,0.08);--border2:rgba(245,240,232,0.16);
+  --shadow:0 2px 8px rgba(0,0,0,0.3);--shadow2:0 8px 32px rgba(0,0,0,0.4);
+}
+body.dark .login-card{background:#231c16}
+body.dark .login-field input{background:#2d241c;color:#f5f0e8}
+body.dark .role-pill{background:#2d241c;color:#f5f0e8}
+body.dark .role-pill.active{background:var(--brown);color:#fff}
+body.dark input[type=text],body.dark input[type=date],body.dark input[type=password],body.dark select{background:#2d241c;color:#f5f0e8}
+body.dark .settings-card{background:#231c16}
+body.dark .modal{background:#231c16}
+body.dark .mfoot{background:#231c16}
+body.dark tbody tr:hover{background:#231c16}
+body.dark tbody tr.sel{background:#2a2010}
+body.dark tbody tr.own-row{border-left-color:var(--gold2)}
+.mode-btn{font-family:var(--font);font-size:13px;font-weight:600;border-radius:var(--r);border:1.5px solid rgba(255,255,255,0.2);cursor:pointer;padding:7px 12px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.85);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.mode-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
 </style>
 </head>
 <body>
@@ -229,6 +265,8 @@ input.err{border-color:var(--red)!important}
         <div class="user-role-lbl" id="userRoleLbl"></div>
       </div>
     </div>
+    <button class="mode-btn" id="modeBtn" onclick="toggleMode()" title="Toggle dark/light mode">&#x263C;</button>
+    <button class="btn btn-outline btn-sm" onclick="openSettings()" id="settingsBtn">&#x2699; Settings</button>
     <button class="btn btn-outline btn-sm" onclick="logout()">&#x238B; Logout</button>
   </div>
 </div>
@@ -318,6 +356,102 @@ input.err{border-color:var(--red)!important}
   </div>
 </div>
 
+
+<!-- SETTINGS OVERLAY -->
+<div class="overlay hidden" id="settingsOv">
+  <div class="modal" style="max-width:620px">
+    <div class="mhdr">
+      <span class="mhdr-title">&#x2699; Settings</span>
+      <button class="mclose" onclick="closeSettings()">&#x2715;</button>
+    </div>
+    <div style="border-bottom:1px solid var(--border2);background:var(--cream2);display:flex;padding:0 20px">
+      <button class="stab active" id="stab-credentials" onclick="switchSettingsTab('credentials')">Credentials</button>
+      <button class="stab" id="stab-about" onclick="switchSettingsTab('about')">About</button>
+    </div>
+    <div class="mbody" style="padding:20px">
+
+      <!-- CREDENTIALS TAB -->
+      <div class="spage active" id="spage-credentials">
+        <div class="settings-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div class="settings-title">Admin Account</div>
+            <span class="badge-admin">Admin</span>
+          </div>
+          <div class="settings-sub">Full access to all features including settings.</div>
+          <div class="settings-row">
+            <div class="settings-field">
+              <label class="settings-label">Username</label>
+              <input type="text" id="set_admin_user" placeholder="Admin username">
+            </div>
+            <div class="settings-field">
+              <label class="settings-label">New Password</label>
+              <input type="password" id="set_admin_pass" placeholder="Leave blank to keep current">
+            </div>
+          </div>
+          <button class="btn btn-brown btn-sm" onclick="saveCredentials('admin')">Save Admin Credentials</button>
+        </div>
+
+        <div class="settings-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div class="settings-title">User Account</div>
+            <span class="badge-user">User</span>
+          </div>
+          <div class="settings-sub">Can view, add, edit, delete shipments and export CSV.</div>
+          <div class="settings-row">
+            <div class="settings-field">
+              <label class="settings-label">Username</label>
+              <input type="text" id="set_user_user" placeholder="User username">
+            </div>
+            <div class="settings-field">
+              <label class="settings-label">New Password</label>
+              <input type="password" id="set_user_pass" placeholder="Leave blank to keep current">
+            </div>
+          </div>
+          <button class="btn btn-brown btn-sm" onclick="saveCredentials('user')">Save User Credentials</button>
+        </div>
+        <p style="font-size:11px;color:var(--ink3);margin-top:14px">&#x26A0; Only admins can access settings. Credentials are saved in this browser — share updated credentials with your team manually.</p>
+        <div class="settings-divider"></div>
+        <div class="settings-title" style="margin-bottom:4px">Appearance</div>
+        <div class="settings-sub">Choose your preferred display mode. Saved per browser.</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-ghost" id="lightModeBtn" onclick="setMode('light')" style="flex:1;justify-content:center">&#x263C; Light Mode</button>
+          <button class="btn btn-ghost" id="darkModeBtn" onclick="setMode('dark')" style="flex:1;justify-content:center">&#x263D; Dark Mode</button>
+        </div>
+      </div>
+
+      <!-- ABOUT TAB -->
+      <div class="spage" id="spage-about">
+        <div class="settings-card">
+          <div class="settings-title">UPS Shipment Tracker</div>
+          <div class="settings-sub">Connected to Supabase — real-time sync across all users.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+            <div style="background:var(--cream2);border-radius:var(--r);padding:12px">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:4px">Database</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">Supabase (PostgreSQL)</div>
+            </div>
+            <div style="background:var(--cream2);border-radius:var(--r);padding:12px">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:4px">Hosting</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">GitHub Pages</div>
+            </div>
+            <div style="background:var(--cream2);border-radius:var(--r);padding:12px">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:4px">Sync</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">Realtime + 10s polling</div>
+            </div>
+            <div style="background:var(--cream2);border-radius:var(--r);padding:12px">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:4px">Version</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink)">1.0.0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mfoot">
+      <button class="btn btn-ghost" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast hidden" id="toast"></div>
 
 <script>
@@ -358,7 +492,8 @@ function selectRole(role){
 function doLogin(){
   const username = g('l_user').value.trim();
   const password = g('l_pass').value;
-  const cred = CREDENTIALS[selectedRole];
+  const liveCreds = loadCredentials();
+  const cred = liveCreds[selectedRole];
   if(!username||!password){ g('loginErr').textContent='Please enter username and password.'; return; }
   if(username===cred.username && password===cred.password){
     SESSION = { role: selectedRole, username };
@@ -403,6 +538,7 @@ let S = { data:[], filtered:[], sortCol:'created_at', sortDir:'desc', page:1, ps
 document.addEventListener('DOMContentLoaded', ()=>{
   g('l_pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
   g('l_user').addEventListener('keydown', e=>{ if(e.key==='Enter') g('l_pass').focus(); });
+  initMode();
   SESSION = getSession();
   if(SESSION){ g('loginScreen').classList.add('hidden'); applyRoleUI(); startApp(); }
 });
@@ -661,6 +797,7 @@ function bindEvents(){
   });
   g('modalOv').addEventListener('click',e=>{if(e.target===g('modalOv'))closeModal();});
   g('confirmOv').addEventListener('click',e=>{if(e.target===g('confirmOv'))closeConfirm();});
+  g('settingsOv').addEventListener('click',e=>{if(e.target===g('settingsOv'))closeSettings();});
   g('dropZone').addEventListener('click',()=>g('fileInput').click());
   g('fileInput').addEventListener('change',e=>{if(e.target.files[0])setFile(e.target.files[0]);});
   g('dropZone').addEventListener('dragover',e=>{e.preventDefault();g('dropZone').classList.add('over');});
@@ -678,6 +815,80 @@ function q(v){return '"'+String(v||'').replace(/"/g,'""')+'"';}
 function fmtDate(d){if(!d)return'\u2014';const[y,m,day]=d.split('-');return (day||'?')+'/'+(m||'?')+'/'+(y||'?');}
 let _tt;
 function toast(msg,type=''){const t=g('toast');t.textContent=msg;t.className='toast '+type;clearTimeout(_tt);_tt=setTimeout(()=>t.classList.add('hidden'),3500);}
+
+// SETTINGS
+const CRED_KEY = 'ups_credentials';
+function loadCredentials(){
+  try{ return JSON.parse(localStorage.getItem(CRED_KEY)) || JSON.parse(JSON.stringify(CREDENTIALS)); }
+  catch{ return JSON.parse(JSON.stringify(CREDENTIALS)); }
+}
+function openSettings(){
+  if(SESSION&&SESSION.role!=='admin'){ toast('Only admins can access settings.','err'); return; }
+  const creds = loadCredentials();
+  g('set_admin_user').value = creds.admin.username;
+  g('set_admin_pass').value = '';
+  g('set_user_user').value  = creds.user.username;
+  g('set_user_pass').value  = '';
+  switchSettingsTab('credentials');
+  const curMode=localStorage.getItem(MODE_KEY)||'light'; updateModeButtons(curMode);
+  g('settingsOv').classList.remove('hidden');
+}
+function closeSettings(){ g('settingsOv').classList.add('hidden'); }
+function switchSettingsTab(tab){
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.spage').forEach(p=>p.classList.remove('active'));
+  g('stab-'+tab).classList.add('active');
+  g('spage-'+tab).classList.add('active');
+}
+function saveCredentials(role){
+  const creds = loadCredentials();
+  const userEl = role==='admin' ? g('set_admin_user') : g('set_user_user');
+  const passEl = role==='admin' ? g('set_admin_pass') : g('set_user_pass');
+  const newUser = userEl.value.trim();
+  const newPass = passEl.value.trim();
+  if(!newUser){ toast('Username cannot be empty.','err'); return; }
+  creds[role].username = newUser;
+  if(newPass) creds[role].password = newPass;
+  localStorage.setItem(CRED_KEY, JSON.stringify(creds));
+  passEl.value='';
+  toast((role==='admin'?'Admin':'User')+' credentials saved ✓','ok');
+}
+
+
+// DARK / LIGHT MODE
+const MODE_KEY = 'ups_mode';
+function toggleMode(){
+  const isDark = document.body.classList.contains('dark');
+  setMode(isDark ? 'light' : 'dark');
+}
+function setMode(mode){
+  if(mode==='dark'){
+    document.body.classList.add('dark');
+    g('modeBtn').textContent = '\u263D';
+    g('modeBtn').title = 'Switch to light mode';
+  } else {
+    document.body.classList.remove('dark');
+    g('modeBtn').textContent = '\u263C';
+    g('modeBtn').title = 'Switch to dark mode';
+  }
+  localStorage.setItem(MODE_KEY, mode);
+  updateModeButtons(mode);
+}
+function updateModeButtons(mode){
+  const lb = g('lightModeBtn'), db = g('darkModeBtn');
+  if(!lb||!db) return;
+  lb.style.background = mode==='light' ? 'var(--brown)' : '';
+  lb.style.color = mode==='light' ? '#fff' : '';
+  lb.style.borderColor = mode==='light' ? 'var(--brown)' : '';
+  db.style.background = mode==='dark' ? 'var(--brown)' : '';
+  db.style.color = mode==='dark' ? '#fff' : '';
+  db.style.borderColor = mode==='dark' ? 'var(--brown)' : '';
+}
+function initMode(){
+  const saved = localStorage.getItem(MODE_KEY) || 'light';
+  setMode(saved);
+}
+
 </script>
 </body>
 </html>
