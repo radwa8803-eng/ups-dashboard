@@ -335,7 +335,7 @@ body.dark tbody tr.own-row{border-left-color:var(--gold2)}
         <div class="ff"><label class="flbl">Date Sent to Finance</label><input type="date" id="f_date"></div>
         <div class="ff full">
           <label class="flbl">Attach Document</label>
-          <div class="drop" id="dropZone"><div class="drop-ic">&#x1F4C4;</div><div class="drop-tx" id="dropTx"><strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX &mdash; max 20 MB</div></div>
+          <div class="drop" id="dropZone"><div class="drop-ic">&#x1F4C4;</div><div class="drop-tx" id="dropTx"><strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX &mdash; max 100 MB</div></div>
           <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx">
           <div class="fattach hidden" id="fattach"></div>
         </div>
@@ -694,9 +694,9 @@ function clearForm(){
   ['e_awb','e_acc','e_per'].forEach(id=>g(id).classList.add('hidden'));
   ['f_awb','f_acc','f_per'].forEach(id=>g(id).classList.remove('err'));
 }
-function resetDrop(){g('dropTx').innerHTML='<strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX &mdash; max 20 MB';}
+function resetDrop(){g('dropTx').innerHTML='<strong>Click to browse</strong> or drag &amp; drop<br>PDF, JPG, PNG, DOCX &mdash; max 100 MB';}
 function setFile(f){
-  if(f.size>20*1024*1024){toast('File too large. Max 20MB.','err');return;}
+  if(f.size>100*1024*1024){toast('File too large. Max 100MB.','err');return;}
   S.attachedFile=f;g('fattach').textContent='\u2713 '+f.name+'  ('+(f.size/1024).toFixed(0)+' KB)';g('fattach').classList.remove('hidden');
 }
 async function saveShipment(){
